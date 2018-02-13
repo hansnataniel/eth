@@ -66,117 +66,80 @@ class CronController extends Controller
 				if($cloudsendlink["status"] != false)
 				{
 					$cloudgetbalance = $cloudsendlink["data"]["balance"];
-					$cloudgetavgone = $cloudsendlink["data"]["avgHashrate"]["h1"];
-
-
-
-					/*
-						Get last mining history
-					*/
-						$lastmininghistory = Mininghistory::orderBy('id', 'desc')->first();
 
 					/*
 						Create new record of mining history
 					*/
-						$mininghistory = new Mininghistory;
-						$mininghistory->balance_api = $cloudgetbalance;
+					$mininghistory = new Mininghistory;
+					
+					$mininghistory->balance_api = $cloudgetbalance;
 
-						/*
-							Pengecekkan data pertama dari table Mininghistories
-						*/
-						if($lastmininghistory != null)
+					/*
+						Get last mining history
+					*/
+					$lastmininghistory = Mininghistory::orderBy('id', 'desc')->first();
+
+					/*
+						Pengecekkan data pertama dari table Mininghistories
+					*/
+					if($lastmininghistory != null)
+					{
+						if($cloudgetbalance < $lastmininghistory->balance_api)
 						{
-							if($cloudgetbalance < $lastmininghistory->balance_api)
-							{
-								$mininghistory->inc = $lastmininghistory->inc++;
-							}
-							else
-							{
-								$mininghistory->inc = $lastmininghistory->inc;
-							}
-
-							$balancereal = $cloudgetbalance + $lastmininghistory->inc;
-
-							$mininghistory->balance_real = $balancereal;
-							$mininghistory->selisih_real = $balancereal - $lastmininghistory->balance_real;
-							$mininghistory->balance = $balancereal - ($balancereal * $setting->charge) / 100;
-							$mininghistory->selisih = ($balancereal - ($balancereal * $setting->charge) / 100) - $lastmininghistory->balance;
+							$inc = $lastmininghistory->inc + $setting->payout;
 						}
 						else
 						{
-							$mininghistory->inc = 0;
-							$mininghistory->balance_real = $cloudgetbalance;
-							$mininghistory->selisih_real = $cloudgetbalance;
-							$mininghistory->balance = $cloudgetbalance - ($cloudgetbalance * $setting->charge) / 100;
-							$mininghistory->selisih = $cloudgetbalance - ($cloudgetbalance * $setting->charge) / 100;
+							$inc = $lastmininghistory->inc;
 						}
-						$mininghistory->save();
+						$mininghistory->inc = $inc;
 
-
-					/*
-						Get last Avg
-					*/
-						$lastAvg = Avg::orderBy('id', 'desc')->first();
-
-					/*
-						Create new Avg
-					*/
-						$avg = new Avg;
-						/*
-							Pengecekkan data pertama dari table AVG
-						*/
-						if($lastAvg != null)
-						{
-							/*
-								Pengecekkan jika hasil yang didapat dari API sama, maka rata2 yang dimasukkan adalah rata2 yang lama
-							*/
-							if($cloudgetbalance == $lastmininghistory->balance_real)
-							{
-								$avg->average = $lastAvg->average;
-							}
-							else
-							{
-								$avg->average = (($lastAvg->average * $lastAvg->counter) + $mininghistory->selisih) / ($lastAvg->counter + 1);
-							}
-							$avg->counter = $lastAvg->counter + 1;
-						}
-						else
-						{
-							$avg->average = $mininghistory->selisih;
-							$avg->counter = 1;
-						}
-						$avg->save();
+						$balance_real = $cloudgetbalance + $inc;
+						$mininghistory->balance_real = $balance_real;
+						$selisih_real = $balancereal - $lastmininghistory->balance_real;
+						$mininghistory->selisih_real = $selisih_real;
+						$mininghistory->balance = $lastmininghistory->balance + ((100 - $setting->charge) / 100 * $selisih_real);
+						$mininghistory->selisih = (100 - $setting->charge) / 100 * $selisih_real;
+					}
+					else
+					{
+						$mininghistory->inc = 0;
+						$mininghistory->balance_real = $cloudgetbalance;
+						$mininghistory->selisih_real = $cloudgetbalance;
+						$mininghistory->balance = $cloudgetbalance - ($cloudgetbalance * $setting->charge) / 100;
+						$mininghistory->selisih = $cloudgetbalance - ($cloudgetbalance * $setting->charge) / 100;
+					}
+					$mininghistory->save();
 
 					/*
 						Create new User Mining History
 					*/
-						$users = User::where('is_active', '=', true)->where('is_suspended', '=', false)->where(function($qr){
-							$qr->where('cloudminingmh', '!=', 0);
-							$qr->orWhere('cloudminingmh', '!=', null);	
-						})->get();
-						if($users != null)
-						{
-							foreach ($users as $user) {
-								$lastusermininghistory = Usermininghistory::where('user_id', '=', $user->id)->orderBy('id', 'desc')->first();
+					$users = User::where('is_active', '=', true)->where('is_suspended', '=', false)->where(function($qr){
+						$qr->where('cloudminingmh', '!=', 0);
+						$qr->orWhere('cloudminingmh', '!=', null);	
+					})->get();
+					if($users != null)
+					{
+						foreach ($users as $user) {
+							$lastusermininghistory = Usermininghistory::where('user_id', '=', $user->id)->orderBy('id', 'desc')->first();
 
-								$userminingselisih = $mininghistory->selisih * ($user->cloudminingmh / $setting->totalmh);
+							$userminingselisih = $mininghistory->selisih * ($user->cloudminingmh / $setting->totalmh);
 
-								$usermininghistory = new Usermininghistory;
-								$usermininghistory->user_id = $user->id;
-								if($lastusermininghistory != null)
-								{
-									$usermininghistory->balance = $userminingselisih + $lastusermininghistory->balance;
-								}
-								else
-								{
-									$usermininghistory->balance = $userminingselisih;
-								}
-								$usermininghistory->selisih = $userminingselisih;
-									
-								$usermininghistory->save();
+							$usermininghistory = new Usermininghistory;
+							$usermininghistory->user_id = $user->id;
+							if($lastusermininghistory != null)
+							{
+								$usermininghistory->balance = $userminingselisih + $lastusermininghistory->balance;
 							}
+							else
+							{
+								$usermininghistory->balance = $userminingselisih;
+							}
+							$usermininghistory->selisih = $userminingselisih;
+								
+							$usermininghistory->save();
 						}
-
+					}
 					
 					/*
 						Pengiriman email jika status TRUE
