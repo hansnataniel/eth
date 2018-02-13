@@ -41,6 +41,7 @@ class CreateSettingsTable extends Migration
             $table->integer('idr_charge');
             $table->integer('usd_kurs');
             $table->integer('mh_price');
+            $table->float('payout');
             $table->string('cloud_mining_walletid');
             $table->string('machine_walletid');
             
