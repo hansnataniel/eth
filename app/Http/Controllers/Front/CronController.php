@@ -133,7 +133,7 @@ class CronController extends Controller
 								}
 							}
 
-							$userminingselisih = $mininghistory->selisih * (($user->cloudminingmh - $uncountmh) / $setting->totalmh);
+							$userminingselisih = $lastmininghistory->selisih * (($user->cloudminingmh - $uncountmh) / $setting->totalmh);
 
 							$usermininghistory = new Usermininghistory;
 							$usermininghistory->user_id = $user->id;
