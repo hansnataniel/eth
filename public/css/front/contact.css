@@ -1,0 +1,52 @@
+.contact-desc {
+	position: relative;
+	display: block;
+	margin-bottom: 32px;
+	font-size: 22px;
+	font-family: roboto;
+	color: #222;
+	font-weight: normal;
+	text-align: center;
+	line-height: 30px;
+}
+
+
+
+
+/* Desktops and laptops */
+@media screen and (min-width : 1224px) {
+
+}
+
+/* Tablet */
+@media screen and (max-width: 1024px) {
+	
+}
+
+/* Mobile */
+@media screen and (max-width: 768px) {
+	.top-right {
+		display: none;
+	}
+
+	.menu-switch {
+		display: block;
+	}
+
+	.contact-desc {
+		font-size: 18px;
+		line-height: 27px;
+	}
+}
+
+@media screen and (max-width: 768px) and (orientation: landscape) {
+
+}
+
+@media screen and (max-width: 768px) and (orientation: portrait) {
+
+}
+
+@media screen and (max-width : 500px) {
+	
+}

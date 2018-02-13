@@ -1,0 +1,253 @@
+#curve_chart {
+    position: relative;
+    display: block;
+    width: calc(100% - 70px - (100% / 3));
+    height: 300px;
+    margin: 0px auto 30px;
+    background: #feeb2d;
+    padding: 20px;
+    box-shadow: 10px 10px 0px #4c4c4c;
+}
+
+#curve_chart rect:first-child {
+    fill: transparent !important;
+}
+
+#curve_chart g:nth-child(6) > text:nth-child(13) {
+    display: none !important;
+}
+
+#curve_chart rect:last-child {
+    fill: transparent !important;
+}
+
+#curve_chart g:nth-child(2) > text:nth-child(2) {
+    fill: #222 !important;
+    font-size: 18px !important;
+    font-weight: bold !important;
+    text-align: center !important;
+}
+
+#curve_chart g:nth-child(3) line {
+    stroke: #4c4c4c !important;
+}
+
+#curve_chart g:nth-child(6) text {
+    fill: #222 !important;
+    font-weight: bold !important;
+}
+
+.full-height {
+    height: 100vh;
+}
+
+.flex-center {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+}
+
+.position-ref {
+    position: relative;
+}
+
+.content {
+    text-align: center;
+    width: 100%;
+}
+
+.title {
+    font-size: 84px;
+}
+
+.links-item > a {
+    color: #636b6f;
+    padding: 0 25px;
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: .1rem;
+    text-decoration: none;
+    text-transform: uppercase;
+}
+
+.m-b-md {
+    margin-bottom: 30px;
+}
+
+.machine-group {
+    position: relative;
+    display: block;
+    width: calc(100% - 60px);
+    margin: auto;
+    font-size: 0px;
+    text-align: center;
+    font-family: roboto;
+}
+
+.machine-item {
+    position: relative;
+    display: inline-block;
+    vertical-align: top;
+    width: calc((100% / 3) - 30px);
+    padding: 30px 20px;
+    /*border: 1px solid #feeb2d;*/
+    background: #feeb2d;
+    box-shadow: 10px 10px 0px #4c4c4c;
+    margin-right: 30px;
+    font-size: 16px;
+    text-align: left;
+    line-height: 20px;
+    height: 150px;
+    overflow: auto;
+    color: #222;
+    margin-bottom: 30px;
+}
+
+.machine-item:nth-child(2) {
+    margin-right: 0px;
+}
+
+.machine-item:last-child {
+    margin-right: 0px;
+    display: block;
+    margin: auto;
+    width: calc(100% - 30px - (100% / 3));
+    margin-bottom: 50px;
+    height: 530px;
+}
+
+.machine-title {
+    position: relative;
+    display: block;
+    font-size: 18px;
+    font-weight: normal;
+    font-weight: bold;
+    margin: 0px 0px 20px;
+}
+
+.machine-list-item {
+    position: relative;
+    display: block;
+    padding: 10px;
+    border-bottom: 1px solid #222;
+}
+
+.machine-list-item span {
+    position: relative;
+    display: block;
+}
+
+.machine-list-item span:first-child {
+    font-size: 12px;
+}
+
+.machine-list-item:last-child {
+    border-bottom: 0px;
+}
+
+.machine-list table {
+    position: relative;
+    width: 100%;
+    text-align: left;
+    font-weight: normal;
+}
+
+.machine-list table tr:first-child {
+    border-bottom: double #222;
+}
+
+.machine-list table th, td {
+    padding: 10px;
+}
+
+.machine-list table th {
+    font-weight: bold;
+}
+
+.machine-list table td {
+    font-weight: normal;
+}
+
+.machine-list table.machine-table-mob {
+    display: none;
+}
+
+
+/* Desktops and laptops */
+@media screen and (min-width : 1224px) {
+
+}
+
+/* Tablet */
+@media screen and (max-width: 1024px) {
+	.machine-item.dash {
+        height: 70px !important;
+        line-height: 70px !important;
+        font-size: 18px !important;
+    }
+}
+
+/* Mobile */
+@media screen and (max-width: 768px) {
+	.content-title span {
+        font-size: 30px !important;
+    }
+
+    .content-title {
+        font-size: 18px !important;
+    }
+
+    .machine-item {
+        display: block;
+        width: 100% !important;
+    }
+
+    .machine-item.dash {
+        height: 70px !important;
+        line-height: 70px !important;
+        font-size: 14px !important;
+    }
+
+    .machine-list table.machine-table {
+        display: none;
+    }
+
+    .machine-list table.machine-table-mob {
+        display: table;
+        border: 1px solid #222;
+        margin-bottom: 20px;
+    }
+
+    .machine-list table.machine-table-mob td {
+        padding: 5px 10px;
+    }
+
+    .machine-list table.machine-table-mob tr:first-child {
+        border: 0px;
+    }
+}
+
+@media screen and (max-width: 768px) and (orientation: landscape) {
+
+}
+
+@media screen and (max-width: 768px) and (orientation: portrait) {
+
+}
+
+@media screen and (max-width : 500px) {
+    .content-title {
+        font-size: 16px !important;
+    }
+
+    .machine-item.dash {
+        width: calc(100% - 60px) !important;
+        height: 70px !important;
+        line-height: 70px !important;
+        font-size: 18px !important;
+    }
+
+    .machine-item.dash.first {
+        margin-bottom: 30px !important;
+    }
+}
