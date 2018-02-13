@@ -17,8 +17,8 @@ class CreateUsermhsTable extends Migration
             $table->increments('id');
             $table->string('no_nota');
             $table->integer('user_id');
-            $table->string('mh');
-            $table->string('date');
+            $table->integer('mh');
+            $table->datetime('active_time');
             $table->string('status');
             $table->boolean('is_active');
             $table->timestamps();
