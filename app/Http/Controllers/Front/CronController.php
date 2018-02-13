@@ -123,7 +123,17 @@ class CronController extends Controller
 						foreach ($users as $user) {
 							$lastusermininghistory = Usermininghistory::where('user_id', '=', $user->id)->orderBy('id', 'desc')->first();
 
-							$userminingselisih = $mininghistory->selisih * ($user->cloudminingmh / $setting->totalmh);
+							$usermhs = Usermh::where('user_id', '=', $user->id)->where('status', '=', 'Active')->where('is_active', '=', true)->get();
+							$uncountmh = 0;
+							foreach ($usermhs as $usermh)
+							{
+								if (strtotime($usermh->active_time) > date("Y-m-d H:i:s", strtotime('-1 hour')))
+								{
+									$uncountmh = $uncountmh + $usermh->mh;
+								}
+							}
+
+							$userminingselisih = $mininghistory->selisih * (($user->cloudminingmh - $uncountmh) / $setting->totalmh);
 
 							$usermininghistory = new Usermininghistory;
 							$usermininghistory->user_id = $user->id;
