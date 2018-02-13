@@ -29,6 +29,8 @@ class CreateUsersTable extends Migration
             $table->integer('cloudminingmh');
             $table->integer('machinemh');
 
+            $table->float('balance');
+
             $table->integer('suspended_by');
             $table->integer('unsuspended_by');
             $table->datetime('suspended_at');
