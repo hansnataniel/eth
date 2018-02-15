@@ -34,6 +34,7 @@ class CreateSettingsTable extends Migration
             $table->string('instagram')->nullable();
 
             $table->integer('totalmh');
+            $table->integer('usedmh');
             $table->integer('minfee');
             $table->integer('charge');
 
