@@ -99,8 +99,6 @@ function rupiah3($nilai)
 	return number_format((float)$nilai, 0,",",".");
 }
 
-
-
 Route::get('creidsdb', function() {
     return view('back.template.creidsdb');
 });
@@ -145,229 +143,214 @@ if (Schema::hasTable('settings'))
 		    return view('errors.optimize');
 		});
 
-
-
 		/*
 			ROUTE FOR BACK END
 		*/
 
-			Route::group(['namespace' => 'Back', 'guard'=>'admin', 'prefix' => Crypt::decrypt($setting->admin_url)], function() use ($setting) 
-			{
-				
-				/*
-					LOGIN CONTROLLER
-				*/
-			    Route::get('/', 'AuthController@getLogin')->name('login');
-			    Route::post('/', 'AuthController@postLogin')->name('login');
-			    Route::get('logout', 'AuthController@getLogout')->name('logout');
+		Route::group(['namespace' => 'Back', 'guard'=>'admin', 'prefix' => Crypt::decrypt($setting->admin_url)], function() use ($setting) 
+		{
+			/*
+				LOGIN CONTROLLER
+			*/
+			Route::get('/', 'AuthController@getLogin')->name('login');
+			Route::post('/', 'AuthController@postLogin')->name('login');
+			Route::get('logout', 'AuthController@getLogout')->name('logout');
 
-			    /*
-					FORGOT PASSWORD CONTROLLER
-				*/
-			    Route::get('password/remind', 'ReminderController@getRemind');
-			    Route::post('password/remind', 'ReminderController@postRemind');
-			    Route::get('password/reset/{token?}', 'ReminderController@getReset');
-			    Route::post('password/reset/{token?}', 'ReminderController@postReset');
+			/*
+				FORGOT PASSWORD CONTROLLER
+			*/
+			Route::get('password/remind', 'ReminderController@getRemind');
+			Route::post('password/remind', 'ReminderController@postRemind');
+			Route::get('password/reset/{token?}', 'ReminderController@getReset');
+			Route::post('password/reset/{token?}', 'ReminderController@postReset');
 
-			    /**
-				 * CROPPING ROUTE
-				 */
+			/**
+			 * CROPPING ROUTE
+			 */
 
-				Route::get('cropper/{width}/{height}', function(Request $request, $width, $height){
-					if ($request->ajax())
-					{
-						$data['w_ratio'] = $width;
-						$data['h_ratio'] = $height;
+			Route::get('cropper/{width}/{height}', function(Request $request, $width, $height){
+				if ($request->ajax())
+				{
+					$data['w_ratio'] = $width;
+					$data['h_ratio'] = $height;
 
-						return view('back.crop.jquery', $data);
-					}
-				});
-
-				Route::group(['middleware' => ['authback', 'undoneback', 'sessiontimeback', 'backlastactivity']], function(){
-
-					/* 
-						DASHBOARD 
-					*/
-					Route::get('dashboard', function(Request $request){
-						$setting = Setting::first();
-						$data['setting'] = $setting;
-
-						$data['messageModul'] = true;
-						$data['alertModul'] = true;
-						$data['searchModul'] = true;
-						$data['helpModul'] = true;
-						$data['navModul'] = true;
-
-						$mininghistories = Mininghistory::orderBy('id', 'desc')->take(24)->get();
-						$data['mininghistories'] = $mininghistories;
-
-						$data['request'] = $request;
-
-						return view('back.dashboard.index', $data);
-					});
-
-					/* 
-						SETTING US CONTROLLER 
-					*/
-						Route::get('setting/edit', 'SettingController@getEdit');
-						Route::post('setting/edit', 'SettingController@postEdit');
-
-					/*
-						USER CONTROLLER
-					*/
-						Route::get('user/edit-profile', 'UserController@getEditProfile');
-						Route::post('user/edit-profile', 'UserController@postEditProfile');
-						Route::get('user/suspended/{id}', 'UserController@getsuspended');
-						Route::get('user/machine/{id}', 'UserController@getMachine');
-						Route::get('user/machine-create/{id}', 'UserController@getMachineCreate');
-						Route::post('user/machine-create/{id}', 'UserController@postMachineCreate');
-						Route::get('user/machine-show/{id}', 'UserController@getMachineShow');
-						Route::get('user/machine-edit/{id}', 'UserController@getMachineEdit');
-						Route::post('user/machine-edit/{id}', 'UserController@postMachineEdit');
-						Route::post('user/machine-delete/{id}', 'UserController@postMachineDelete');
-					Route::resource('user', 'UserController');
-
-					/*
-						ADMIN GROUP CONTROLLER
-					*/
-					Route::resource('admingroup', 'AdmingroupController');
-
-					/*
-						ADMIN CONTROLLER
-					*/
-						Route::get('admin/edit-profile', 'AdminController@getEditProfile');
-						Route::post('admin/edit-profile', 'AdminController@postEditProfile');
-						Route::get('admin/suspended/{id}', 'AdminController@getsuspended');
-					Route::resource('admin', 'AdminController');
-
-
-					/*
-						BANK CONTROLLER
-					*/
-					Route::resource('bank', 'BankController');
-
-					/* 
-						PURCHASE CONTROLLER 
-					*/
-						Route::get('purchase/pending', 'PurchaseController@getPending');
-					Route::resource('purchase', 'PurchaseController');
-
-					/* 
-						PAYMENT CONTROLLER 
-					*/
-						Route::get('payment/pending', 'PaymentController@getPending');
-						Route::get('payment/confirm/{id}', 'PaymentController@getConfirm');
-						Route::get('payment/decline/{id}', 'PaymentController@getDecline');
-					Route::resource('payment', 'PaymentController');
-
-					/* 
-						WITHDRAWAL CONTROLLER 
-					*/
-						Route::get('withdrawal/pending', 'WithdrawalController@getPending');
-						Route::get('withdrawal/confirm/{id}', 'WithdrawalController@getConfirm');
-						Route::get('withdrawal/decline/{id}', 'WithdrawalController@getDecline');
-					Route::resource('withdrawal', 'WithdrawalController');
-
-					/*
-						CONTACT CONTROLLER
-					*/
-					Route::resource('contact', 'ContactController');
-				});
+					return view('back.crop.jquery', $data);
+				}
 			});
+
+			Route::group(['middleware' => ['authback', 'undoneback', 'sessiontimeback', 'backlastactivity']], function(){
+
+				/* 
+					DASHBOARD 
+				*/
+				Route::get('dashboard', function(Request $request){
+					$setting = Setting::first();
+					$data['setting'] = $setting;
+
+					$data['messageModul'] = true;
+					$data['alertModul'] = true;
+					$data['searchModul'] = true;
+					$data['helpModul'] = true;
+					$data['navModul'] = true;
+
+					$mininghistories = Mininghistory::orderBy('id', 'desc')->take(24)->get();
+					$data['mininghistories'] = $mininghistories;
+
+					$data['request'] = $request;
+
+					return view('back.dashboard.index', $data);
+				});
+
+				/* 
+					SETTING CONTROLLER 
+				*/
+				Route::get('setting/edit', 'SettingController@getEdit');
+				Route::post('setting/edit', 'SettingController@postEdit');
+
+				/*
+					USER CONTROLLER
+				*/
+				Route::get('user/edit-profile', 'UserController@getEditProfile');
+				Route::post('user/edit-profile', 'UserController@postEditProfile');
+				Route::get('user/suspended/{id}', 'UserController@getsuspended');
+				Route::get('user/machine/{id}', 'UserController@getMachine');
+				Route::get('user/machine-create/{id}', 'UserController@getMachineCreate');
+				Route::post('user/machine-create/{id}', 'UserController@postMachineCreate');
+				Route::get('user/machine-show/{id}', 'UserController@getMachineShow');
+				Route::get('user/machine-edit/{id}', 'UserController@getMachineEdit');
+				Route::post('user/machine-edit/{id}', 'UserController@postMachineEdit');
+				Route::post('user/machine-delete/{id}', 'UserController@postMachineDelete');
+				Route::resource('user', 'UserController');
+
+				/*
+					ADMIN GROUP CONTROLLER
+				*/
+				Route::resource('admingroup', 'AdmingroupController');
+
+				/*
+					ADMIN CONTROLLER
+				*/
+				Route::get('admin/edit-profile', 'AdminController@getEditProfile');
+				Route::post('admin/edit-profile', 'AdminController@postEditProfile');
+				Route::get('admin/suspended/{id}', 'AdminController@getsuspended');
+				Route::resource('admin', 'AdminController');
+
+
+				/*
+					BANK CONTROLLER
+				*/
+				Route::resource('bank', 'BankController');
+
+				/* 
+					PURCHASE CONTROLLER 
+				*/
+				Route::get('purchase/pending', 'PurchaseController@getPending');
+				Route::resource('purchase', 'PurchaseController');
+
+				/* 
+					PAYMENT CONTROLLER 
+				*/
+				Route::get('payment/pending', 'PaymentController@getPending');
+				Route::get('payment/confirm/{id}', 'PaymentController@getConfirm');
+				Route::get('payment/decline/{id}', 'PaymentController@getDecline');
+				Route::resource('payment', 'PaymentController');
+
+				/* 
+					WITHDRAWAL CONTROLLER 
+				*/
+				Route::get('withdrawal/pending', 'WithdrawalController@getPending');
+				Route::get('withdrawal/confirm/{id}', 'WithdrawalController@getConfirm');
+				Route::get('withdrawal/decline/{id}', 'WithdrawalController@getDecline');
+				Route::resource('withdrawal', 'WithdrawalController');
+
+				/*
+					CONTACT CONTROLLER
+				*/
+				Route::resource('contact', 'ContactController');
+			});
+		});
 
 
 		/*
 			ROUTE FOR FRONT END
 		*/
+		Route::group(['namespace' => 'Front', 'guard'=>'web', 'middleware' => ['appisup', 'visitorcounter', 'pageload', 'visitorlastactivity']], function(){
 
-			Route::group(['namespace' => 'Front', 'guard'=>'web', 'middleware' => ['appisup', 'visitorcounter', 'pageload', 'visitorlastactivity']], function(){
+			/*
+				REGISTRATION CONTROLLER
+			*/
+			Route::resource('register', 'RegistrationController', ['only' => ['index', 'store']]);
+
+			/*
+				LOGIN CONTROLLER
+			*/
+			Route::get('login', 'AuthController@getLogin')->name('login');
+			Route::post('login', 'AuthController@postLogin')->name('login');
+			Route::get('logout', 'AuthController@getLogout')->name('logout');
+
+			/*
+				FORGOT PASSWORD CONTROLLER
+			*/
+			Route::get('password/remind', 'ReminderController@getRemind');
+			Route::post('password/remind', 'ReminderController@postRemind');
+			Route::get('password/reset/{token?}', 'ReminderController@getReset');
+			Route::post('password/reset/{token?}', 'ReminderController@postReset');
+
+
+			Route::group(['middleware' => ['authfront', 'undonefront', 'sessiontimefront', 'frontlastactivity']], function(){
+				/*
+					DASHBOARD CONTROLLER
+				*/
+				Route::get('dashboard/get-avg', 'DashboardController@getavg');
+				Route::get('dashboard/mh', 'DashboardController@getMh');
+				Route::get('dashboard/machine', 'DashboardController@getMachine');
+				Route::get('dashboard/machine/detail/{id}', 'DashboardController@getMachineDetail');
+				Route::resource('dashboard', 'DashboardController');
 
 				/*
-					REGISTRATION CONTROLLER
+					PROFILE CONTROLLER
 				*/
-				Route::resource('register', 'RegistrationController', ['only' => ['index', 'store']]);
+				Route::resource('my-profile', 'ProfileController', ['only' => ['index', 'update']]);
 
 				/*
-					LOGIN CONTROLLER
+					SUBSCRIPTION CONTROLLER
 				*/
-				Route::get('login', 'AuthController@getLogin')->name('login');
-			    Route::post('login', 'AuthController@postLogin')->name('login');
-			    Route::get('logout', 'AuthController@getLogout')->name('logout');
+				Route::get('subscription/del/{id}', 'SubscriptionController@getDel');
+				Route::get('subscription/history', 'SubscriptionController@getHistory');
+				Route::resource('subscription', 'SubscriptionController');
 
-			    /*
-					FORGOT PASSWORD CONTROLLER
-				*/
-				    Route::get('password/remind', 'ReminderController@getRemind');
-				    Route::post('password/remind', 'ReminderController@postRemind');
-				    Route::get('password/reset/{token?}', 'ReminderController@getReset');
-				    Route::post('password/reset/{token?}', 'ReminderController@postReset');
-
-
-				Route::group(['middleware' => ['authfront', 'undonefront', 'sessiontimefront', 'frontlastactivity']], function(){
-
-					/*
-						DASHBOARD CONTROLLER
-					*/
-					    Route::get('dashboard/get-avg', 'DashboardController@getavg');
-					    Route::get('dashboard/mh', 'DashboardController@getMh');
-					    Route::get('dashboard/machine', 'DashboardController@getMachine');
-					    Route::get('dashboard/machine/detail/{id}', 'DashboardController@getMachineDetail');
-					Route::resource('dashboard', 'DashboardController');
-
-					/*
-						PROFILE CONTROLLER
-					*/
-					Route::resource('my-profile', 'ProfileController', ['only' => ['index', 'update']]);
-
-					/*
-						SUBSCRIPTION CONTROLLER
-					*/
-						Route::get('subscription/del/{id}', 'SubscriptionController@getDel');
-						Route::get('subscription/history', 'SubscriptionController@getHistory');
-					Route::resource('subscription', 'SubscriptionController');
-
-
-					/*
-						PAYMENT CONTROLLER
-					*/
-						Route::get('payment/history', 'PaymentController@getHistory');
-						Route::get('payment/{id?}', 'PaymentController@getPayment');
-						Route::post('payment/{id?}', 'PaymentController@store');
-					Route::resource('payment', 'PaymentController');
-
-					/*
-						WITHDRAWAL CONTROLLER
-					*/
-						Route::get('withdrawal/history', 'WithdrawalController@getHistory');
-					Route::resource('withdrawal', 'WithdrawalController');
-						
-				});
 
 				/*
-					CONTACT US CONTROLLER
+					PAYMENT CONTROLLER
 				*/
-				Route::resource('contact-us', 'ContactController');
+				Route::get('payment/history', 'PaymentController@getHistory');
+				Route::get('payment/{id?}', 'PaymentController@getPayment');
+				Route::post('payment/{id?}', 'PaymentController@store');
+				Route::resource('payment', 'PaymentController');
 
-				Route::get('maintenance', function (Request $request) {
-				    return view('errors.maintenance');
-				});
-
-				Route::get('/', function (Request $request) {
-					$data['request'] = $request;
-
-					// $lastAvg = Avg::orderBy('id', 'last')->first();
-
-					// $createAvg = new Avg;
-					// $createAvg->mh = $lastAvg->mh + 0.2;
-					// $createAvg->selisih = ($lastAvg->mh - 0.2);
-					// $createAvg->counter = $lastAvg->counter + 1;
-					// $createAvg->save();
-
-				    return view('front.home.index', $data);
-				});
-
-				Route::resource('cron', 'CronController');
+				/*
+					WITHDRAWAL CONTROLLER
+				*/
+				Route::get('withdrawal/history', 'WithdrawalController@getHistory');
+				Route::resource('withdrawal', 'WithdrawalController');
 			});
+
+			/*
+				CONTACT US CONTROLLER
+			*/
+			Route::resource('contact-us', 'ContactController');
+
+			Route::get('maintenance', function (Request $request) {
+				return view('errors.maintenance');
+			});
+
+			Route::get('/', function (Request $request) {
+				$data['request'] = $request;
+				return view('front.home.index', $data);
+			});
+
+			Route::resource('cron', 'CronController');
+		});
 	}
 	else
 	{

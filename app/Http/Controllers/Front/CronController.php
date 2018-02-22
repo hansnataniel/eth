@@ -14,8 +14,6 @@ use App\Models\Avg;
 use App\Models\Purchase;
 use App\Models\Mininghistory;
 use App\Models\Usermininghistory;
-use App\Models\Machine;
-use App\Models\Machinemininghistory;
 
 /*
 	Call Mail file & mail facades
@@ -41,18 +39,12 @@ use DB;
 
 class CronController extends Controller
 {
-    /* 
-    	GET THE LIST OF THE RESOURCE
-    */
 	public function index(Request $request)
 	{
 		DB::transaction(function(){
 
 			$setting = Setting::first();
 
-			/*
-				CLOUD MINING
-			*/
 			$cloudsendlink = getData("https://api.nanopool.org/v1/eth/user/" . $setting->cloud_mining_walletid);
 			
 			/*
@@ -173,67 +165,6 @@ class CronController extends Controller
 					Mail::to($email)
 						->send(new Cronfail());
 				}
-			}
-
-			/*
-				MACHINE MINING
-			*/
-			$machinesendlink = getData("https://api.nanopool.org/v1/eth/user/" . $setting->machine_walletid);
-			if($machinesendlink["status"] != false)
-			{
-				$machinegetbalance = $machinesendlink["data"]["balance"];
-				$machinegetavgone = $machinesendlink["data"]["avgHashrate"]["h1"];
-
-				/*
-					Machine Mining History
-				*/
-
-				// $machines = Machine::where('is_active', '=', true)->get();
-				// if($machines != null)
-				// {
-
-				// 	/*
-				// 		Create new machine mining history
-				// 	*/
-				// 		foreach ($machines as $machine) {
-				// 		/*
-				// 			Get last machine mining history
-				// 		*/
-				// 			$lastmachinemininghistory = Machinemininghistory::where('user_id', '=', $machine->user_id)->orderBy('id', 'desc')->first();
-
-				// 			$machinemininghistory = new Machinemininghistory;
-				// 			$machinemininghistory->machine_id = $machine->machine_id;
-				// 			$machinemininghistory->balance_api = $machinegetbalance;
-
-				// 			if($lastmachinemininghistory != null)
-				// 			{
-				// 				if($machinegetbalance < $lastmachinemininghistory->balance_api)
-				// 				{
-				// 					$machinemininghistory->inc = $lastmachinemininghistory->inc++;
-				// 				}
-				// 				else
-				// 				{
-				// 					$machinemininghistory->inc = $lastmachinemininghistory->inc;
-				// 				}
-
-				// 				$balancereal = $machinegetbalance + $lastmachinemininghistory->inc;
-
-				// 				$machinemininghistory->balance_real = $balancereal;
-				// 				$machinemininghistory->selisih_real = $balancereal - $lastmachinemininghistory->balance_real;
-				// 				$machinemininghistory->balance = $balancereal - ($balancereal * $setting->charge) / 100;
-				// 				$machinemininghistory->selisih = ($balancereal - ($balancereal * $setting->charge) / 100) - $lastmachinemininghistory->balance;
-				// 			}
-				// 			else
-				// 			{
-				// 				$machinemininghistory->inc = 0;
-				// 				$machinemininghistory->balance_real = $machinegetbalance;
-				// 				$machinemininghistory->selisih_real = 0;
-				// 				$machinemininghistory->balance = $machinegetbalance - ($machinegetbalance * $setting->charge) / 100;
-				// 				$machinemininghistory->selisih = 0;
-				// 			}
-				// 			$machinemininghistory->save();
-				// 		}
-				// }
 			}
 		});
 	}
