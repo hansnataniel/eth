@@ -47,207 +47,194 @@ class CronController extends Controller
 	public function index(Request $request)
 	{
 		DB::transaction(function(){
-			// global $mininghistory;
-			// global $avg;
-			// global $users;
-
 
 			$setting = Setting::first();
 
 			/*
 				CLOUD MINING
 			*/
-				// $cloudsendlink = getData("https://api.nanopool.org/v1/eth/balance/" . $setting->cloud_mining_walletid);
-				$cloudsendlink = getData("https://api.nanopool.org/v1/eth/user/" . $setting->cloud_mining_walletid);
-				
+			$cloudsendlink = getData("https://api.nanopool.org/v1/eth/user/" . $setting->cloud_mining_walletid);
+			
+			/*
+				Pengecekkan status API
+			*/
+			if($cloudsendlink["status"] != false)
+			{
+				$cloudgetbalance = $cloudsendlink["data"]["balance"];
+
 				/*
-					Pengecekkan status API
+					Create new record of mining history
 				*/
-				if($cloudsendlink["status"] != false)
+				$mininghistory = new Mininghistory;
+				
+				$mininghistory->balance_api = $cloudgetbalance;
+
+				/*
+					Get last mining history
+				*/
+				$lastmininghistory = Mininghistory::orderBy('id', 'desc')->first();
+
+				/*
+					Pengecekkan data pertama dari table Mininghistories
+				*/
+				if($lastmininghistory != null)
 				{
-					$cloudgetbalance = $cloudsendlink["data"]["balance"];
-
-					/*
-						Create new record of mining history
-					*/
-					$mininghistory = new Mininghistory;
-					
-					$mininghistory->balance_api = $cloudgetbalance;
-
-					/*
-						Get last mining history
-					*/
-					$lastmininghistory = Mininghistory::orderBy('id', 'desc')->first();
-
-					/*
-						Pengecekkan data pertama dari table Mininghistories
-					*/
-					if($lastmininghistory != null)
+					if($cloudgetbalance < $lastmininghistory->balance_api)
 					{
-						if($cloudgetbalance < $lastmininghistory->balance_api)
-						{
-							$inc = $lastmininghistory->inc + $setting->payout;
-						}
-						else
-						{
-							$inc = $lastmininghistory->inc;
-						}
-						$mininghistory->inc = $inc;
-
-						$balance_real = $cloudgetbalance + $inc;
-						$mininghistory->balance_real = $balance_real;
-						$selisih_real = $balancereal - $lastmininghistory->balance_real;
-						$mininghistory->selisih_real = $selisih_real;
-						$mininghistory->balance = $lastmininghistory->balance + ((100 - $setting->charge) / 100 * $selisih_real);
-						$mininghistory->selisih = (100 - $setting->charge) / 100 * $selisih_real;
+						$inc = $lastmininghistory->inc + $setting->payout;
 					}
 					else
 					{
-						$mininghistory->inc = 0;
-						$mininghistory->balance_real = $cloudgetbalance;
-						$mininghistory->selisih_real = $cloudgetbalance;
-						$mininghistory->balance = $cloudgetbalance - ($cloudgetbalance * $setting->charge) / 100;
-						$mininghistory->selisih = $cloudgetbalance - ($cloudgetbalance * $setting->charge) / 100;
+						$inc = $lastmininghistory->inc;
 					}
-					$mininghistory->save();
+					$mininghistory->inc = $inc;
 
-					/*
-						Create new User Mining History
-					*/
-					$users = User::where('is_active', '=', true)->where('is_suspended', '=', false)->where(function($qr){
-						$qr->where('cloudminingmh', '!=', 0);
-						$qr->orWhere('cloudminingmh', '!=', null);	
-					})->get();
-					if($users != null)
-					{
-						foreach ($users as $user) {
-							$lastusermininghistory = Usermininghistory::where('user_id', '=', $user->id)->orderBy('id', 'desc')->first();
-
-							$usermhs = Usermh::where('user_id', '=', $user->id)->where('status', '=', 'Active')->where('is_active', '=', true)->get();
-							$uncountmh = 0;
-							foreach ($usermhs as $usermh)
-							{
-								if (strtotime($usermh->active_time) > date("Y-m-d H:i:s", strtotime('-1 hour')))
-								{
-									$uncountmh = $uncountmh + $usermh->mh;
-								}
-							}
-
-							$userminingselisih = $lastmininghistory->selisih * (($user->cloudminingmh - $uncountmh) / $setting->totalmh);
-
-							$usermininghistory = new Usermininghistory;
-							$usermininghistory->user_id = $user->id;
-							if($lastusermininghistory != null)
-							{
-								$usermininghistory->balance = $userminingselisih + $lastusermininghistory->balance;
-							}
-							else
-							{
-								$usermininghistory->balance = $userminingselisih;
-							}
-							$usermininghistory->selisih = $userminingselisih;
-								
-							$usermininghistory->save();
-						}
-					}
-					
-					/*
-						Pengiriman email jika status TRUE
-					*/
-					$emails = [
-						'1' => 'hans@creids.net',
-						'2' => 'anggi@creids.net'
-					];
-
-					foreach ($emails as $email) {
-						Mail::to($email)
-						    ->send(new Cron($mininghistory, $avg, $users));
-					}
+					$balance_real = $cloudgetbalance + $inc;
+					$mininghistory->balance_real = $balance_real;
+					$selisih_real = $balancereal - $lastmininghistory->balance_real;
+					$mininghistory->selisih_real = $selisih_real;
+					$mininghistory->balance = $lastmininghistory->balance + ((100 - $setting->charge) / 100 * $selisih_real);
+					$mininghistory->selisih = (100 - $setting->charge) / 100 * $selisih_real;
 				}
 				else
 				{
-					/*
-						Pengiriman email jika status FALSE
-					*/
-					$emails = [
-						'1' => 'hans@creids.net',
-						'2' => 'anggi@creids.net'
-					];
+					$mininghistory->inc = 0;
+					$mininghistory->balance_real = $cloudgetbalance;
+					$mininghistory->selisih_real = $cloudgetbalance;
+					$mininghistory->balance = $cloudgetbalance - ($cloudgetbalance * $setting->charge) / 100;
+					$mininghistory->selisih = $cloudgetbalance - ($cloudgetbalance * $setting->charge) / 100;
+				}
+				$mininghistory->save();
 
-					foreach ($emails as $email) {
-						Mail::to($email)
-						    ->send(new Cronfail());
+				/*
+					Create new User Mining History
+				*/
+				$users = User::where('is_active', '=', true)->where('is_suspended', '=', false)->where(function($qr){
+					$qr->where('cloudminingmh', '!=', 0);
+					$qr->orWhere('cloudminingmh', '!=', null);	
+				})->get();
+				if($users != null)
+				{
+					foreach ($users as $user) {
+						$lastusermininghistory = Usermininghistory::where('user_id', '=', $user->id)->orderBy('id', 'desc')->first();
+
+						$usermhs = Usermh::where('user_id', '=', $user->id)->where('status', '=', 'Active')->where('is_active', '=', true)->get();
+						$uncountmh = 0;
+						foreach ($usermhs as $usermh)
+						{
+							if (strtotime($usermh->active_time) > date("Y-m-d H:i:s", strtotime('-1 hour')))
+							{
+								$uncountmh = $uncountmh + $usermh->mh;
+							}
+						}
+
+						$userminingselisih = $lastmininghistory->selisih * (($user->cloudminingmh - $uncountmh) / $setting->totalmh);
+
+						$usermininghistory = new Usermininghistory;
+						$usermininghistory->user_id = $user->id;
+						if($lastusermininghistory != null)
+						{
+							$usermininghistory->balance = $userminingselisih + $lastusermininghistory->balance;
+						}
+						else
+						{
+							$usermininghistory->balance = $userminingselisih;
+						}
+						$usermininghistory->selisih = $userminingselisih;
+							
+						$usermininghistory->save();
 					}
 				}
+				
+				/*
+					Pengiriman email jika status TRUE
+				*/
+				$emails = [
+					'1' => 'hans@creids.net',
+					'2' => 'anggi@creids.net'
+				];
+
+				foreach ($emails as $email) {
+					Mail::to($email)
+						->send(new Cron($mininghistory, $avg, $users));
+				}
+			}
+			else
+			{
+				/*
+					Pengiriman email jika status FALSE
+				*/
+				$emails = [
+					'1' => 'hans@creids.net',
+					'2' => 'anggi@creids.net'
+				];
+
+				foreach ($emails as $email) {
+					Mail::to($email)
+						->send(new Cronfail());
+				}
+			}
 
 			/*
 				MACHINE MINING
 			*/
-				// $machinesendlink = getData("https://api.nanopool.org/v1/eth/balance/" . $setting->machine_walletid);
-				$machinesendlink = getData("https://api.nanopool.org/v1/eth/user/" . $setting->machine_walletid);
-				if($machinesendlink["status"] != false)
-				{
-					$machinegetbalance = $machinesendlink["data"]["balance"];
-					$machinegetavgone = $machinesendlink["data"]["avgHashrate"]["h1"];
+			$machinesendlink = getData("https://api.nanopool.org/v1/eth/user/" . $setting->machine_walletid);
+			if($machinesendlink["status"] != false)
+			{
+				$machinegetbalance = $machinesendlink["data"]["balance"];
+				$machinegetavgone = $machinesendlink["data"]["avgHashrate"]["h1"];
 
+				/*
+					Machine Mining History
+				*/
 
+				// $machines = Machine::where('is_active', '=', true)->get();
+				// if($machines != null)
+				// {
 
-					/*
-						Machine Mining History
-					*/
+				// 	/*
+				// 		Create new machine mining history
+				// 	*/
+				// 		foreach ($machines as $machine) {
+				// 		/*
+				// 			Get last machine mining history
+				// 		*/
+				// 			$lastmachinemininghistory = Machinemininghistory::where('user_id', '=', $machine->user_id)->orderBy('id', 'desc')->first();
 
-						// $machines = Machine::where('is_active', '=', true)->get();
-						// if($machines != null)
-						// {
+				// 			$machinemininghistory = new Machinemininghistory;
+				// 			$machinemininghistory->machine_id = $machine->machine_id;
+				// 			$machinemininghistory->balance_api = $machinegetbalance;
 
-						// 	/*
-						// 		Create new machine mining history
-						// 	*/
-						// 		foreach ($machines as $machine) {
-						// 		/*
-						// 			Get last machine mining history
-						// 		*/
-						// 			$lastmachinemininghistory = Machinemininghistory::where('user_id', '=', $machine->user_id)->orderBy('id', 'desc')->first();
+				// 			if($lastmachinemininghistory != null)
+				// 			{
+				// 				if($machinegetbalance < $lastmachinemininghistory->balance_api)
+				// 				{
+				// 					$machinemininghistory->inc = $lastmachinemininghistory->inc++;
+				// 				}
+				// 				else
+				// 				{
+				// 					$machinemininghistory->inc = $lastmachinemininghistory->inc;
+				// 				}
 
-						// 			$machinemininghistory = new Machinemininghistory;
-						// 			$machinemininghistory->machine_id = $machine->machine_id;
-						// 			$machinemininghistory->balance_api = $machinegetbalance;
+				// 				$balancereal = $machinegetbalance + $lastmachinemininghistory->inc;
 
-						// 			if($lastmachinemininghistory != null)
-						// 			{
-						// 				if($machinegetbalance < $lastmachinemininghistory->balance_api)
-						// 				{
-						// 					$machinemininghistory->inc = $lastmachinemininghistory->inc++;
-						// 				}
-						// 				else
-						// 				{
-						// 					$machinemininghistory->inc = $lastmachinemininghistory->inc;
-						// 				}
-
-						// 				$balancereal = $machinegetbalance + $lastmachinemininghistory->inc;
-
-						// 				$machinemininghistory->balance_real = $balancereal;
-						// 				$machinemininghistory->selisih_real = $balancereal - $lastmachinemininghistory->balance_real;
-						// 				$machinemininghistory->balance = $balancereal - ($balancereal * $setting->charge) / 100;
-						// 				$machinemininghistory->selisih = ($balancereal - ($balancereal * $setting->charge) / 100) - $lastmachinemininghistory->balance;
-						// 			}
-						// 			else
-						// 			{
-						// 				$machinemininghistory->inc = 0;
-						// 				$machinemininghistory->balance_real = $machinegetbalance;
-						// 				$machinemininghistory->selisih_real = 0;
-						// 				$machinemininghistory->balance = $machinegetbalance - ($machinegetbalance * $setting->charge) / 100;
-						// 				$machinemininghistory->selisih = 0;
-						// 			}
-						// 			$machinemininghistory->save();
-						// 		}
-						// }
-				}
-
+				// 				$machinemininghistory->balance_real = $balancereal;
+				// 				$machinemininghistory->selisih_real = $balancereal - $lastmachinemininghistory->balance_real;
+				// 				$machinemininghistory->balance = $balancereal - ($balancereal * $setting->charge) / 100;
+				// 				$machinemininghistory->selisih = ($balancereal - ($balancereal * $setting->charge) / 100) - $lastmachinemininghistory->balance;
+				// 			}
+				// 			else
+				// 			{
+				// 				$machinemininghistory->inc = 0;
+				// 				$machinemininghistory->balance_real = $machinegetbalance;
+				// 				$machinemininghistory->selisih_real = 0;
+				// 				$machinemininghistory->balance = $machinegetbalance - ($machinegetbalance * $setting->charge) / 100;
+				// 				$machinemininghistory->selisih = 0;
+				// 			}
+				// 			$machinemininghistory->save();
+				// 		}
+				// }
+			}
 		});
-
-		// global $mininghistory;
-		// global $avg;
-		// global $users;
 	}
 }
