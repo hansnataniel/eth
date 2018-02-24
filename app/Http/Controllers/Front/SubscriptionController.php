@@ -50,37 +50,17 @@ class SubscriptionController extends Controller
 		
 		$data['request'] = $request;
 
-		$type_options = [
-			'' => 'Select Type',
-			'1' => 'MH',
-			'2' => 'Dedicated Machine'
-		];
-		$data['type_options'] = $type_options;
-
 		$setting = Setting::first();
 		$data['setting'] = $setting;
-
-		$usermhs = Purchase::where('is_active', '=', true)->get();
-		$usermhtotal = 0;
-		foreach ($usermhs as $usermh) {
-			$usermhtotal = $usermhtotal + $usermh->mh;
-		}
 
 		$mhs[''] = 'Select MH';
 
 		if($setting->totalmh > 0)
 		{
-			if(!$usermhs->isEmpty())
-			{
-				$gettotalmh = ($setting->totalmh - $usermhtotal) / 100;
-			}
-			else
-			{
-				$gettotalmh = $setting->totalmh / 100;
-			}
+			$availablemh = ($setting->totalmh - $setting->usedmh) / 20;
 				
-			for ($i=1; $i <= $gettotalmh; $i++) { 
-				$mhs[100 * $i] = 100 * $i;
+			for ($i=1; $i <= $availablemh; $i++) { 
+				$mhs[20 * $i] = 20 * $i;
 			}
 		}
 
@@ -93,7 +73,6 @@ class SubscriptionController extends Controller
 	{
 		$inputs = $request->all();
 		$rules = array(
-			// 'type' 				=> 'required',
 			'mh' 			=> 'required|min:0',
 		);
 
@@ -118,28 +97,14 @@ class SubscriptionController extends Controller
 				$no_nota = 'S/' . date('ymd') . '/' . ($lastpurchase->id + 1001);
 			}
 
-			// if($type == '1')
-			// {
-				$usermh = new Purchase;
-				$usermh->no_nota = $no_nota;
-				$usermh->user_id = Auth::user()->id;
-				$usermh->mh = htmlspecialchars($request->input('mh'));
-				$usermh->date = '0000-00-00';
-				$usermh->status = 'Waiting for Payment';
-				$usermh->is_active = true;
-				$usermh->save();
-			// }
-			// else
-			// {
-			// 	$usermh = new Purchase;
-			// 	$usermh->no_nota = $no_nota;
-			// 	$usermh->user_id = Auth::user()->id;
-			// 	$usermh->mh = htmlspecialchars($request->input('mh'));
-			// 	$usermh->date = '0000-00-00';
-			// 	$usermh->status = 'Waiting for Payment';
-			// 	$usermh->is_active = true;
-			// 	$usermh->save();
-			// }
+			$usermh = new Purchase;
+			$usermh->no_nota = $no_nota;
+			$usermh->user_id = Auth::user()->id;
+			$usermh->mh = htmlspecialchars($request->input('mh'));
+			$usermh->date = '0000-00-00';
+			$usermh->status = 'Waiting for Payment';
+			$usermh->is_active = true;
+			$usermh->save();
 
 			$user = User::find(Auth::user()->id);
 			$subject = "Subscription Confirmation";
