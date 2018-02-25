@@ -315,7 +315,7 @@ if (Schema::hasTable('settings'))
 				/*
 					SUBSCRIPTION CONTROLLER
 				*/
-				Route::get('subscription/del/{id}', 'SubscriptionController@getDel');
+				Route::get('subscription/cancel/{id}', 'SubscriptionController@getCancel');
 				Route::get('subscription/history', 'SubscriptionController@getHistory');
 				Route::resource('subscription', 'SubscriptionController');
 
