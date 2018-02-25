@@ -111,7 +111,7 @@ class CronController extends Controller
 
 						$uncount_time = date("Y-m-d H:i:s", strtotime('-1 hour'));
 
-						$usermh = Usermh::select(DB::raw('sum(mh) as total_mh'))->where('user_id', '=', $user->id)->where('status', '=', 'Active')->where('is_active', '=', true)->where('active_time', '>', $uncount_time)->first();
+						$usermh = Usermh::select(DB::raw('sum(mh) as total_mh'))->where('user_id', '=', $user->id)->where('status', '=', 'Active')->where('is_active', '=', true)->where('active_time', '<', $uncount_time)->first();
 						// $uncountmh = 0;
 						// foreach ($usermhs as $usermh)
 						// {
