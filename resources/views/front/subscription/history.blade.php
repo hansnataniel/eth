@@ -43,55 +43,40 @@
 @section('content')
 	<div class="content-container">
 		<h1 class="content-title" style="font-size: 26px;">
-			CLOUD MINING HISTORY
+			MH PURCHASE HISTORY
 		</h1>
 		
 		<div class="content-group" style="max-width: 820px; font-size: 0px;">
-			@if(($getusermhs->isEmpty()) AND ($paidgetusermhs->isEmpty()))
+			@if(($usermhs->isEmpty()) AND ($paidusermhs->isEmpty()))
 				<span class="empty">
-					You don't have purchase history
+					You don't have any purchase
 				</span>
 			@endif
 
-			@if(!$getusermhs->isEmpty())
+			@if(!$usermhs->isEmpty())
 				<div class="regis-group-list satu">
-					<h3>
-						Waiting for Payment
-					</h3>
-					@foreach($getusermhs as $getusermh)
+					@foreach($usermhs as $usermh)
 						<div class="regis-item-list">
-							{{date('d-m-Y', strtotime($getusermh->created_at))}}<br>
+							{{date('d-m-Y', strtotime($usermh->created_at))}}<br>
 							<span style="font-size: 14px;">
-								No Nota : {{$getusermh->no_nota}}<br>
-								<strong>{{$getusermh->mh}} MH</strong>
-							</span>
-							<a class="regis-pay" href="{{URL::to('payment/' . str_replace('/', '-', $getusermh->no_nota))}}">
-								PAY
-							</a>
-							<a class="regis-del" href="{{URL::to('subscription/del/' . str_replace('/', '-', $getusermh->no_nota))}}">
-								DELETE
-							</a>
-						</div>
-					@endforeach
-				</div>
-			@endif
-
-			@if(!$paidgetusermhs->isEmpty())
-				<div class="regis-group-list dua">
-					<h3>
-						Paid
-					</h3>
-					@foreach($paidgetusermhs as $paidgetusermh)
-						<div class="regis-item-list">
-							{{date('d-m-Y', strtotime($paidgetusermh->created_at))}}<br>
-							<span style="font-size: 14px; padding-bottom: 5px; position: relative; display: block;">
-								No Nota : {{$paidgetusermh->no_nota}}<br>
-								<strong>{{$paidgetusermh->mh}} MH</strong>
-							</span>
-							<span style="line-height: 16px;">
-								Confirmed at: {{date('d-m-Y', strtotime($paidgetusermh->date))}}<br>
-								Due date: {{date('d-m-Y', strtotime($paidgetusermh->date . '+ 3 Year'))}}
-							</span>
+								Transaction Code: {{$usermh->no_nota}}<br>
+								<strong>{{$usermh->mh}} MH</strong>
+							</span><br>
+							<span>Status: {{$usermh->status}}</span>
+							@if($usermh->status == "Waiting for Payment")
+								<a class="regis-pay" href="{{URL::to('payment/' . str_replace('/', '-', $usermh->no_nota))}}">
+									PAY
+								</a>
+								<a class="regis-del" href="{{URL::to('subscription/del/' . str_replace('/', '-', $usermh->no_nota))}}">
+									CANCEL
+								</a>
+							@endif
+							@if($usermh->status == "Active")
+								<span style="line-height: 16px;">
+									Started at: {{date('d-m-Y', strtotime($paidusermh->active_time))}}<br>
+									Due date: {{date('d-m-Y', strtotime($paidusermh->date . '+1 Year'))}}
+								</span>
+							@endif
 						</div>
 					@endforeach
 				</div>
